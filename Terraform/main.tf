@@ -33,8 +33,8 @@ module "ansible" {
   source              = "./modules/ansible"
   resource_group_name = var.resource_group_name
   location            = var.location
-  subnet_id           = var.subnet_id
   ssh_key             = var.ssh_key
+  subnet_id           = module.network.subnet_id
   hosts               = var.hosts
 }
 
