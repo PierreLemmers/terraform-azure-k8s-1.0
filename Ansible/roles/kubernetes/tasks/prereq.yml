@@ -1,0 +1,70 @@
+- name: Disable swap
+  ansible.builtin.command: swapoff -a
+
+- name: Remove swap entry from /etc/fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: "^.*swap.*$"
+    state: absent
+
+- name: Load br_netfilter module
+  ansible.builtin.shell: modprobe br_netfilter
+
+- name: Ensure br_netfilter module is loaded on boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/kubernetes.conf
+    content: |
+      br_netfilter
+
+- name: Enable IP forwarding
+  ansible.builtin.sysctl:
+    name: net.ipv4.ip_forward
+    value: "{{ ip_forward_value }}"
+    state: present
+
+- name: Load kernel modules
+  ansible.builtin.copy:
+    content: |
+      overlay
+      br_netfilter
+    dest: /etc/modules-load.d/kubernetes.conf
+
+- name: Ensure sysctl settings are present
+  ansible.builtin.lineinfile:
+    path: /etc/sysctl.conf
+    line: "{{ item }}"
+  loop:
+    - "net.bridge.bridge-nf-call-iptables = 1"
+    - "net.bridge.bridge-nf-call-ip6tables = 1"
+    - "net.ipv4.ip_forward = {{ ip_forward_value }}"
+
+- name: Apply sysctl settings
+  ansible.builtin.command: sysctl -p
+
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ packages }}"
+
+- name: directory creation
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+
+### Install Kubernetes Components
+- name: Install the Kubernetes Python library
+  ansible.builtin.pip:
+    name: kubernetes
+  become: true
+
+- name: Install Helm
+  ansible.builtin.package:
+    name: helm
+    state: present
+    update_cache: yes
+  when: ansible_hostname == "ci-kube-master"
+
+- name: Mark Kubernetes packages on hold
+  ansible.builtin.command: apt-mark hold kubelet kubeadm kubectl

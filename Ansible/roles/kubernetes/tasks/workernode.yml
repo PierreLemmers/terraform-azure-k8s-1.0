@@ -1,0 +1,23 @@
+- name: start and enable crio service
+  ansible.builtin.systemd:
+    name: crio
+    state: started
+    enabled: true
+
+- name: stat that kubelet.conf exists
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf
+
+- name: Join worker nodes to the cluster
+  shell: "{{ kubernetes_join_command }}"
+  when:
+    - inventory_hostname in groups['kube_workers']
+    - not kubelet_conf.stat.exists
+  become: true
+
+- name: remove taint from master node
+  ansible.builtin.shell: "{{ item }}"
+  delegate_to: "ci-kube-master"
+  ignore_errors: yes
+  loop: "{{ worker_node_taints }}"
