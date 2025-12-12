@@ -21,3 +21,5 @@ variable "location" {}
 variable "ssh_key" {
   type = string
 }
+variable "private_ip_address" {
+}

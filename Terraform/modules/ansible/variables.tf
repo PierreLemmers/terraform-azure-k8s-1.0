@@ -1,6 +1,8 @@
 variable "subnet_id" {
   type = string
 }
+variable "private_ip_address" {
+}
 variable "resource_group_name" {
   type = string
 }
