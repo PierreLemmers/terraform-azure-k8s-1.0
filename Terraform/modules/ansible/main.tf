@@ -6,7 +6,8 @@ resource "azurerm_network_interface" "ansible" {
   ip_configuration {
     name                          = "internal"
     subnet_id                     = var.subnet_id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
+    private_ip_address            = var.private_ip_address
   }
 }
 
@@ -16,6 +17,7 @@ resource "azurerm_linux_virtual_machine" "ansible-server" {
   resource_group_name = var.resource_group_name
   size                = "Standard_F2"
   admin_username      = "root"
+  custom_data         = base64encode(data.template_file.ansible_inventory.rendered)
   network_interface_ids = [
     azurerm_network_interface.ansible.id,
   ]

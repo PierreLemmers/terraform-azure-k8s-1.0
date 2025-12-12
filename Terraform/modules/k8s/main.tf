@@ -1,14 +1,19 @@
 resource "azurerm_network_interface" "k8s" {
-  name                = "eth0"
+  for_each = { for k, v in var.hosts : k => v
+  if v.role == "k8s-control" || v.role == "k8s-worker" }
+
+  name                = "${each.key}-nic"
   resource_group_name = var.resource_group_name
   location            = var.location
 
   ip_configuration {
     name                          = "internal"
     subnet_id                     = var.subnet_id
-    private_ip_address_allocation = "Dynamic"
+    private_ip_address_allocation = "Static"
+    private_ip_address            = each.value.private_ip_address
   }
 }
+
 
 resource "azurerm_linux_virtual_machine" "vm" {
   for_each = { for k, v in var.hosts : k => v
@@ -19,7 +24,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   size                = "Standard_F2"
   admin_username      = "root"
   network_interface_ids = [
-    azurerm_network_interface.k8s.id,
+    azurerm_network_interface.k8s[each.key].id,
   ]
 
   admin_ssh_key {

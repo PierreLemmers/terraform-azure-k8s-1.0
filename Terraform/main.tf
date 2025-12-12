@@ -36,6 +36,7 @@ module "ansible" {
   ssh_key             = var.ssh_key
   subnet_id           = module.network.subnet_id
   hosts               = var.hosts
+  private_ip_address  = var.private_ip_address
 }
 
 module "network" {

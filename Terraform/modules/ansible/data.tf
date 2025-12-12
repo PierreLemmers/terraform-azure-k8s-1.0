@@ -8,3 +8,11 @@ data "template_file" "cloudinit_render" {
     role     = each.value.role
   }
 }
+
+data "template_file" "ansible_inventory" {
+  template = file("${path.module}/templates/inventory.yml.tpl")
+
+  vars = {
+    inventory_content = data.template_file.inventory.rendered
+  }
+}
