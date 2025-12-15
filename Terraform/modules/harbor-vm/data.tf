@@ -1,5 +1,5 @@
 data "template_file" "cloudinit_render" {
-  for_each = { for k, v in var.hosts : k => v if v.role == "k8s-control" || v.role == "k8s-worker" }
+  for_each = { for k, v in var.hosts : k => v }
   template = file("${path.module}/cloud-init.yml.tpl")
 
   vars = {

@@ -20,6 +20,15 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
+module "harbor-vm" {
+  source              = "./modules/harbor-vm"
+  subnet_id           = module.network.subnet_id
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  hosts               = var.hosts
+  ssh_key             = var.ssh_key
+  private_ip_address  = var.private_ip_address
+}
 
 module "k8s" {
   source              = "./modules/k8s"
