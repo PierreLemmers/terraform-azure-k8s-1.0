@@ -1,4 +1,4 @@
-resource "azurerm_network_interface" "ansible" {
+resource "azurerm_network_interface" "harbor" {
   name                = "eth0"
   resource_group_name = var.resource_group_name
   location            = var.location
@@ -7,19 +7,19 @@ resource "azurerm_network_interface" "ansible" {
     name                          = "internal"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Static"
-    private_ip_address            = var.private_ip_address
+    private_ip_address            = var.hosts["harbor"].ip
   }
 }
 
-resource "azurerm_linux_virtual_machine" "ansible-server" {
-  name                = "ansible-server-1"
+resource "azurerm_linux_virtual_machine" "harbor-server" {
+  name                = "harbor-server-1"
   location            = var.location
   resource_group_name = var.resource_group_name
   size                = "Standard_F2"
   admin_username      = "azureuser"
-  custom_data         = base64encode(data.template_file.ansible_inventory.rendered)
+  custom_data         = base64encode(data.template_file._inventory.rendered)
   network_interface_ids = [
-    azurerm_network_interface.ansible.id,
+    azurerm_network_interface.harbor.id,
   ]
   admin_ssh_key {
     username   = "azureuser"

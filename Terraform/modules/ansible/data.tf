@@ -4,7 +4,7 @@ data "template_file" "cloudinit_render" {
 
   vars = {
     hostname = each.key
-    ssh_key  = file("~/.ssh/id_rsa.pub")
+    ssh_key  = file("/home/ansible/.ssh/id_rsa.pub")
     role     = each.value.role
   }
 }
