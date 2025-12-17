@@ -1,0 +1,15 @@
+- name: Create install directory
+  file:
+    path: "{{ harbor_install_dir }}"
+    state: directory
+
+- name: Download Harbor installer
+  get_url:
+    url: "https://github.com/goharbor/harbor/releases/download/v{{ harbor_version }}/harbor-online-installer-v{{ harbor_version }}.tgz"
+    dest: "/tmp/harbor.tgz"
+
+- name: Extract Harbor
+  unarchive:
+    src: "/tmp/harbor.tgz"
+    dest: "{{ harbor_install_dir }}"
+    remote_src: yes

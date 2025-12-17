@@ -1,10 +1,10 @@
 data "template_file" "cloudinit_render" {
   for_each = { for k, v in var.hosts : k => v }
-  template = file("${path.module}/cloud-init.yml.tpl")
+  template = file("${path.module}/templates/cloud-init.yml.tpl")
 
   vars = {
     hostname = each.key
-    ssh_key  = file("/home/ansible/.ssh/id_rsa.pub")
+    ssh_key  = var.ssh_public_key
     role     = each.value.role
   }
 }

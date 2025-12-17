@@ -1,0 +1,4 @@
+- name: Template harbor.yml
+  template:
+    src: harbor.yml.j2
+    dest: "{{ harbor_install_dir }}/harbor/harbor.yml"

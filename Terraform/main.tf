@@ -40,6 +40,7 @@ module "k8s" {
 
 module "ansible" {
   source              = "./modules/ansible"
+  ssh_public_key      = tls_private_key.ansible.public_key_openssh
   resource_group_name = var.resource_group_name
   location            = var.location
   ssh_key             = var.ssh_key

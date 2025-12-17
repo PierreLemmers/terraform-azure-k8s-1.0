@@ -1,0 +1,11 @@
+hostname: {{ harbor_hostname }}
+
+harbor_admin_password: {{ harbor_admin_password }}
+
+database:
+  password: {{ harbor_admin_password }}
+
+data_volume: {{ harbor_data_dir }}
+
+http:
+  port: 80

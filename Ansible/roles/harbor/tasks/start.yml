@@ -1,0 +1,4 @@
+- name: Run Harbor installer
+  command: ./install.sh
+  args:
+    chdir: "{{ harbor_install_dir }}/harbor"
