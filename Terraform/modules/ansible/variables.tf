@@ -19,3 +19,6 @@ variable "hosts" {
   }))
   description = "List of hosts to create"
 }
+variable "ssh_public_key" {
+  type = string
+}

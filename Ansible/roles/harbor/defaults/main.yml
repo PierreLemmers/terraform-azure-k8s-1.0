@@ -1,0 +1,8 @@
+---
+# defaults file for harbor
+harbor_version: "2.10.1"
+harbor_hostname: "{{ ansible_fqdn }}"
+harbor_admin_password: "ChangeMe123!"
+harbor_data_dir: /data/harbor
+harbor_install_dir: /opt/harbor
+harbor_https: false
