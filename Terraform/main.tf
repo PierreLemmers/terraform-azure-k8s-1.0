@@ -26,8 +26,16 @@ module "harbor-vm" {
   resource_group_name = var.resource_group_name
   location            = var.location
   hosts               = var.hosts
-  ssh_key             = var.ssh_key
-  private_ip_address  = var.private_ip_address
+  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+}
+
+module "gitlab-vm" {
+  source              = "./modules/harbor-vm"
+  subnet_id           = module.network.subnet_id
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  hosts               = var.hosts
+  ssh_public_key      = tls_private_key.ansible.public_key_openssh
 }
 
 module "k8s" {
@@ -36,17 +44,26 @@ module "k8s" {
   hosts               = var.hosts
   resource_group_name = var.resource_group_name
   location            = var.location
+  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+}
+
+module "k8s-runners" {
+  source              = "./modules/k8s"
+  hosts               = var.runner_hosts
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+  subnet_id           = module.network.runner-subnet_id
 }
 
 module "ansible" {
   source              = "./modules/ansible"
-  ssh_public_key      = tls_private_key.ansible.public_key_openssh
   resource_group_name = var.resource_group_name
   location            = var.location
-  ssh_key             = var.ssh_key
+  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+  ssh_private_key     = tls_private_key.ansible.private_key_pem
   subnet_id           = module.network.subnet_id
   hosts               = var.hosts
-  private_ip_address  = var.private_ip_address
 }
 
 module "network" {

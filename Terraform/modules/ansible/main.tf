@@ -1,3 +1,11 @@
+locals {
+  cloudinit = templatefile("${path.module}/cloud-init.yml.tpl", {
+    hostname        = var.hosts["ansible"].name
+    ssh_public_key  = var.ssh_public_key
+    ssh_private_key = var.ssh_private_key
+  })
+}
+
 resource "azurerm_network_interface" "ansible" {
   name                = "eth0"
   resource_group_name = var.resource_group_name
@@ -7,7 +15,7 @@ resource "azurerm_network_interface" "ansible" {
     name                          = "internal"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "Static"
-    private_ip_address            = var.private_ip_address
+    private_ip_address            = var.hosts["ansible"].ip
   }
 }
 
@@ -17,7 +25,7 @@ resource "azurerm_linux_virtual_machine" "ansible-server" {
   resource_group_name = var.resource_group_name
   size                = "Standard_F2"
   admin_username      = "azureuser"
-  custom_data         = base64encode(data.template_file.ansible_inventory.rendered)
+  custom_data         = base64encode(local.cloudinit)
   network_interface_ids = [
     azurerm_network_interface.ansible.id,
   ]

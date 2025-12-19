@@ -1,16 +1,20 @@
 variable "subnet_id" {
   type = string
 }
-variable "private_ip_address" {
-}
+
 variable "resource_group_name" {
   type = string
 }
-
-variable "location" {}
-variable "ssh_key" {
+variable "ssh_public_key" {
   type = string
 }
+
+variable "ssh_private_key" {
+  type      = string
+  sensitive = true
+}
+variable "location" {}
+
 variable "hosts" {
   type = map(object({
     name = string
@@ -18,7 +22,4 @@ variable "hosts" {
     role = string
   }))
   description = "List of hosts to create"
-}
-variable "ssh_public_key" {
-  type = string
 }
