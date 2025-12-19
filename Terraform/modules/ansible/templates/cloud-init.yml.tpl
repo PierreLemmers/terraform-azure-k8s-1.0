@@ -14,7 +14,6 @@ users:
 package_update: true
 package_upgrade: true
 
-%{ if role == "ansible" }
 write_files:
   - path: /home/ansible/.ssh/id_rsa
     owner: ansible:ansible
@@ -29,25 +28,8 @@ ${indent(6, ssh_private_key)}
 ${indent(6, ssh_public_key)}
 
 runcmd:
+  - mkdir -p /home/ansible/projects/ansible
   - mkdir -p /home/ansible/.ssh
   - chown -R ansible:ansible /home/ansible/.ssh
   - echo "Ansible control node ready" > /etc/motd
-%{ endif }
-
-%{ if role == "k8s-control" || role == "k8s-worker" }
-runcmd:
-  - swapoff -a
-  - sed -i '/ swap / s/^/#/' /etc/fstab
-  - echo "Kubernetes node ready" > /etc/motd
-%{ endif }
-
-%{ if role == "harbor" }
-packages:
-  - docker.io
-  - docker-compose
-
-runcmd:
-  - systemctl enable docker
-  - systemctl start docker
-  - echo "Harbor node ready" > /etc/motd
 %{ endif }

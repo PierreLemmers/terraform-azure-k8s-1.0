@@ -1,4 +1,15 @@
 locals {
+  cloudinit = {
+    for k, v in var.hosts :
+    k => templatefile("${path.module}/cloud-init.yml.tpl", {
+      hostname       = k
+      role           = v.role
+      ssh_public_key = var.ssh_public_key
+    })
+  }
+}
+
+locals {
   k8s_hosts = {
     for k, v in var.hosts :
     k => v

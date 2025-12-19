@@ -1,24 +1,29 @@
 all:
-  hosts:
-%{ for vm in hosts ~}
-    ${vm.name}:
-      ansible_host: ${vm.ip}
-%{ endfor ~}
-
   children:
-    control:
+    ansible:
       hosts:
-%{ for control in hosts ~}
-%{ if control.role == 'k8s-control' }
-        ${control.name}: {}
-%{ endfor ~}
-    workers:
+        ansible:
+          ansible_host: ${hosts["ansible"].ip}
+
+    k8s_control:
       hosts:
-%{ for worker in hosts ~}
-%{ if worker.role == 'k8s-worker' }
-        ${worker.name}: {}
-%{ endfor ~}
+%{ for k, v in hosts ~}
+%{ if v.role == "k8s-control" }
+        ${k}:
+          ansible_host: ${v.ip}
+%{ endif }
+%{ endfor }
+
+    k8s_workers:
+      hosts:
+%{ for k, v in hosts ~}
+%{ if v.role == "k8s-worker" }
+        ${k}:
+          ansible_host: ${v.ip}
+%{ endif }
+%{ endfor }
+
     harbor:
       hosts:
-        harbor-server-1:
-          ansible_host: ${harbor.ip}
+        harbor:
+          ansible_host: ${hosts["harbor"].ip}
