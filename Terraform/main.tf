@@ -53,7 +53,7 @@ module "k8s-runners" {
   resource_group_name = var.resource_group_name
   location            = var.location
   ssh_public_key      = tls_private_key.ansible.public_key_openssh
-  subnet_id           = module.network.runner-subnet_id
+  subnet_id           = module.network.runner_subnet_id
 }
 
 module "ansible" {

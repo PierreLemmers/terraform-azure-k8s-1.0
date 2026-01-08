@@ -12,7 +12,7 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = ["10.0.1.0/24"]
 }
 
-resource "azurerm_subnet" "runner-subnet" {
+resource "azurerm_subnet" "runner_subnet" {
   name                 = "k8s-runner-subnet"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name

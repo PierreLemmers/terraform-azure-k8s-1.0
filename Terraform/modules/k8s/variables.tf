@@ -2,6 +2,7 @@ variable "hosts" {
   type = map(object({
     name = string
     role = string
+    ip = string
   }))
   description = "List of hosts to create"
 }

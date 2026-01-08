@@ -1,9 +1,10 @@
 locals {
   cloudinit = {
     for k, v in var.hosts :
-    k => templatefile("${path.module}/cloud-init.yml.tpl", {
+    k => templatefile("${path.module}/templates/cloud-init.yml.tpl", {
       hostname       = k
       role           = v.role
+      ip             = v.ip
       ssh_public_key = var.ssh_public_key
     })
   }
@@ -46,7 +47,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("/home/azureuser/.ssh/id_rsa.pub")
+    public_key = var.ssh_public_key
   }
 
   os_disk {
