@@ -1,5 +1,5 @@
 locals {
-  cloudinit = templatefile("${path.module}/cloud-init.yml.tpl", {
+  cloudinit = templatefile("${path.module}/templates/cloud-init.yml.tpl", {
     hostname        = var.hosts["ansible"].name
     ssh_public_key  = var.ssh_public_key
     ssh_private_key = var.ssh_private_key
@@ -31,7 +31,7 @@ resource "azurerm_linux_virtual_machine" "ansible-server" {
   ]
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("/home/azureuser/.ssh/id_rsa.pub")
+    public_key = var.ssh_public_key
   }
   os_disk {
     caching              = "ReadWrite"

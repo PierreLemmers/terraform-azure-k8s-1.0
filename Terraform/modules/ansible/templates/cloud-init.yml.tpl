@@ -32,4 +32,3 @@ runcmd:
   - mkdir -p /home/ansible/.ssh
   - chown -R ansible:ansible /home/ansible/.ssh
   - echo "Ansible control node ready" > /etc/motd
-%{ endif }

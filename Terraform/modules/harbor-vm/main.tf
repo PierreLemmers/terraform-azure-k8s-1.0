@@ -17,13 +17,12 @@ resource "azurerm_linux_virtual_machine" "harbor-server" {
   resource_group_name = var.resource_group_name
   size                = "Standard_F2"
   admin_username      = "azureuser"
-  custom_data         = base64encode(data.template_file._inventory.rendered)
   network_interface_ids = [
     azurerm_network_interface.harbor.id,
   ]
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("/home/azureuser/.ssh/id_rsa.pub")
+    public_key = var.ssh_public_key
   }
   os_disk {
     caching              = "ReadWrite"
