@@ -1,12 +1,12 @@
 ---
 - name: controlplane installation and configuration
   ansible.builtin.include_tasks: prereq.yml
-  when: inventory_hostname in groups['kube']
+  when: inventory_hostname in groups['kubernetes']
 
 - name: controlplane installation and configuration
-  ansible.builtin.include_tasks: controlplane.yml
-  when: inventory_hostname in groups['kube_masters']
+  ansible.builtin.include_tasks: control_node.yml
+  when: inventory_hostname in groups['k8s_control']
 
 - name: worker-node joining cluster
   ansible.builtin.include_tasks: workernode.yml
-  when: inventory_hostname in groups['kube_workers']
+  when: inventory_hostname in groups['k8s_workers']

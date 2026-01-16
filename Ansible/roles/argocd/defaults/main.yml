@@ -1,0 +1,4 @@
+---
+# defaults file for argocd
+argocd_namespace: "argocd"
+argocd_version: "v2.11.3" # optional

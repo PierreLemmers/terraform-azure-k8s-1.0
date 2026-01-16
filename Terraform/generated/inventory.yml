@@ -1,0 +1,79 @@
+all:
+  children:
+    ansible:
+      hosts:
+        ansible:
+          ansible_host: 10.0.1.10
+
+    # --- LAN K8s cluster groups ---
+    k8s_lan_control:
+      hosts:
+
+        lan-control-1:
+          ansible_host: 10.0.1.11
+
+    k8s_lan_workers:
+      hosts:
+
+        lan-worker-1:
+          ansible_host: 10.0.1.12
+
+        lan-worker-2:
+          ansible_host: 10.0.1.13
+
+    k8s_lan:
+      children:
+        k8s_lan_control: {}
+        k8s_lan_workers: {}
+
+    # --- Runner K8s cluster groups ---
+    k8s_runner_control:
+      hosts:
+
+        run-control-1:
+          ansible_host: 10.0.2.11
+
+    k8s_runner_workers:
+      hosts:
+
+        run-worker-1:
+          ansible_host: 10.0.2.12
+
+        run-worker-2:
+          ansible_host: 10.0.2.13
+
+    k8s_runner:
+      children:
+        k8s_runner_control: {}
+        k8s_runner_workers: {}
+
+    # --- Combined Kubernetes parent group (both clusters) ---
+    kubernetes:
+      children:
+        k8s_lan: {}
+        k8s_runner: {}
+
+    # --- GitLab (LAN) ---
+    gitlab:
+      hosts:
+
+        gitlab-1:
+          ansible_host: 10.0.1.30
+
+    # --- Harbor groups (split) ---
+    harbor_lan:
+      hosts:
+
+        harbor-lan-1:
+          ansible_host: 10.0.1.20
+
+    harbor_dmz:
+      hosts:
+
+        harbor-dmz-1:
+          ansible_host: 10.0.3.20
+
+    harbor:
+      children:
+        harbor_lan: {}
+        harbor_dmz: {}

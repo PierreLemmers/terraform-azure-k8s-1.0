@@ -13,7 +13,7 @@
   ansible.builtin.shell: |
     kubeadm init --pod-network-cidr={{ kubeadm_pod_network_cidr }} --service-cidr={{ k8s_service_cidr }}
   when:
-    - ansible_hostname == "kube-control"
+    - ansible_hostname == "k8s-control"
     - not kubeadm_status.stat.exists
 
 - name: Get the kubeadm join command
@@ -21,7 +21,7 @@
   command: kubeadm token create --print-join-command
   register: kubernetes_join_command_result
   run_once: true
-  when: ansible_hostname == "kube-control"
+  when: ansible_hostname == "k8s-control"
 
 - name: Set join command as a fact
   set_fact:
@@ -35,7 +35,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-  when: ansible_hostname == "kube-control"
+  when: ansible_hostname == "k8s-control"
   loop: "{{ kubeconfig_directories }}"
 
 - name: Copy kubeconfig file to the local machine for kubectl
@@ -43,15 +43,15 @@
     src: /etc/kubernetes/admin.conf
     dest: "{{ item }}"
     remote_src: yes
-  when: ansible_hostname == "kube-control"
+  when: ansible_hostname == "k8s-control"
   loop: "{{ kubeconfig_files }}"
 
 - name: remove taint from master node
   ansible.builtin.shell: |
-    kubectl taint nodes kube-control node-role.kubernetes.io/control-plane:NoSchedule-
-  when: ansible_hostname == "kube-control"
+    kubectl taint nodes k8s-control node-role.kubernetes.io/control-plane:NoSchedule-
+  when: ansible_hostname == "k8s-control"
   ignore_errors: yes
 
 - name: install calico
   command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-  when: ansible_hostname == "kube-control"
+  when: ansible_hostname == "k8s-control"

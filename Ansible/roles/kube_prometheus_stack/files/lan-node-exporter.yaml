@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter-lan
+  namespace: monitoring
+  labels:
+    app: node-exporter-lan
+spec:
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: 9100
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: node-exporter-lan
+  namespace: monitoring
+subsets:
+  - addresses:
+      - ip: 10.0.1.11
+      - ip: 10.0.1.12
+      - ip: 10.0.1.13
+    ports:
+      - name: metrics
+        port: 9100

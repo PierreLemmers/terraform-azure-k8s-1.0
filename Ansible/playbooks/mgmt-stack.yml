@@ -1,0 +1,18 @@
+---
+- name: Install ArgoCD on mgmt cluster
+  hosts: k8s_mgmt_control
+  become: true
+  roles:
+    - argocd
+
+- name: Install kube-prometheus-stack on mgmt cluster
+  hosts: k8s_mgmt_control
+  become: true
+  roles:
+    - kube_prometheus_stack
+
+- name: Install Rancher on mgmt cluster
+  hosts: k8s_mgmt_control
+  become: true
+  roles:
+    - rancher

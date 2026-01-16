@@ -1,0 +1,14 @@
+---
+# tasks file for argocd
+- name: Ensure argocd namespace exists
+  kubernetes.core.k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ argocd_namespace }}"
+    state: present
+
+- name: Install ArgoCD (official manifests)
+  kubernetes.core.k8s:
+    state: present
+    src: "https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/install.yaml"
+    namespace: "{{ argocd_namespace }}"

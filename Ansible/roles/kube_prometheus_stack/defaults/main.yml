@@ -1,0 +1,9 @@
+---
+# defaults file for kube_prometheus_stack
+monitoring_namespace: "monitoring"
+kps_release: "kps"
+kps_chart: "prometheus-community/kube-prometheus-stack"
+kps_chart_version: "" # optional pin
+
+# Optional: expose Grafana internally only
+grafana_admin_password: "ChangeMe123!" # vault in real use

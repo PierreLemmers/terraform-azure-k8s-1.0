@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: external-node-exporter
+  namespace: monitoring
+spec:
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - node-exporter-lan
+          - node-exporter-runner
+          - node-exporter-infra
+  namespaceSelector:
+    matchNames:
+      - monitoring
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

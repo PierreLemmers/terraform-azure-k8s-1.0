@@ -1,0 +1,15 @@
+- name: Create GitOps repo in GitLab and push bootstrap content
+  hosts: ansible
+  become: false
+  roles:
+    - gitlab_project
+    - gitops_bootstrap
+
+- name: Register Git repo in ArgoCD (mgmt cluster)
+  hosts: k8s_mgmt_control
+  become: true
+  vars:
+    gitops_repo_url: "{{ gitlab_base_url }}/{{ gitlab_group_path }}/{{ gitlab_repo_name }}.git"
+    argocd_repo_password: "{{ gitlab_token }}"
+  roles:
+    - argocd_repo_secret
