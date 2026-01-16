@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-exporter-infra
+  namespace: monitoring
+  labels:
+    app: node-exporter-infra
+spec:
+  ports:
+    - name: metrics
+      port: 9100
+      targetPort: 9100
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: node-exporter-infra
+  namespace: monitoring
+subsets:
+  - addresses:
+      - ip: 10.0.1.10 # ansible
+      - ip: 10.0.1.20 # harbor-lan
+      - ip: 10.0.3.20 # harbor-dmz
+      - ip: 10.0.1.30 # gitlab
+    ports:
+      - name: metrics
+        port: 9100

@@ -1,0 +1,11 @@
+---
+# defaults file for rancher
+rancher_namespace: "cattle-system"
+rancher_hostname: "rancher.carwash.local" # use your Azure Private DNS name
+rancher_replicas: 1
+
+cert_manager_namespace: "cert-manager"
+cert_manager_version: "v1.14.5"
+
+# If you do self-signed lab TLS:
+rancher_tls_source: "rancher" # "rancher" for self-signed via chart, or "secret" if you provide one

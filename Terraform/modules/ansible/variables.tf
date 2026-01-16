@@ -17,9 +17,28 @@ variable "location" {}
 
 variable "hosts" {
   type = map(object({
-    name = string
-    ip   = string
-    role = string
+    name    = string
+    ip      = string
+    role    = string
+    cluster = string
   }))
   description = "List of hosts to create"
+}
+
+variable "git_repo_url" {
+  type        = string
+  description = "Public Git repository to clone on first boot"
+  default     = ""
+}
+
+variable "git_repo_branch" {
+  type        = string
+  description = "Git branch to checkout"
+  default     = "main"
+}
+
+variable "git_dest_dir" {
+  type        = string
+  description = "Destination directory for the cloned repository"
+  default     = "/home/ansible/projects"
 }

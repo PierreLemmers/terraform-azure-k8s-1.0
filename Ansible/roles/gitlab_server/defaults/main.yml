@@ -1,0 +1,20 @@
+---
+# defaults file for gitlab_server
+gitlab_external_url: "https://gitlab.carwash.local"
+gitlab_version: "" # optional pin e.g. "16.11.2-ce.0"
+
+# For a lab you can use Let's Encrypt if the host is reachable publicly; likely not.
+# So default to self-managed TLS termination (nginx) later; here we just install GitLab.
+gitlab_ssh_port: 22
+
+gitlab_packages:
+  - curl
+  - ca-certificates
+  - openssh-server
+  - tzdata
+  - perl
+  - ufw
+
+gitlab_enable_ufw: true
+gitlab_allow_ssh_cidr: "10.0.0.0/16"
+gitlab_allow_https_cidr: "10.0.0.0/16"

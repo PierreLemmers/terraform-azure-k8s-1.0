@@ -1,0 +1,6 @@
+---
+# defaults file for argocd_repo_secret
+argocd_namespace: "argocd"
+gitops_repo_url: ""
+argocd_repo_username: "oauth2"
+argocd_repo_password: "" # token

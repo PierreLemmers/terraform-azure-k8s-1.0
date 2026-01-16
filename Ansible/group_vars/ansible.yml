@@ -1,0 +1,18 @@
+gitops_repo_url: "https://github.com/PierreLemmers/carwash-gitops.git"
+gitops_push: false
+
+lan_node_ips:
+  - "10.0.1.11"
+  - "10.0.1.12"
+  - "10.0.1.13"
+
+runner_node_ips:
+  - "10.0.2.11"
+  - "10.0.2.12"
+  - "10.0.2.13"
+
+infra_node_ips:
+  - "10.0.1.10" # ansible
+  - "10.0.1.20" # harbor-lan
+  - "10.0.3.20" # harbor-dmz
+  - "10.0.1.30" # gitlab

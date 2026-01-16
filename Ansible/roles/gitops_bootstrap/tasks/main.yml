@@ -1,0 +1,219 @@
+---
+# tasks file for gitops_bootstrap
+- name: Assert required inputs
+  ansible.builtin.assert:
+    that:
+      - lan_node_ips | length > 0
+      - runner_node_ips | length > 0
+      - infra_node_ips | length > 0
+    fail_msg: "You must provide lan_node_ips, runner_node_ips, infra_node_ips."
+
+- name: Create base GitOps directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ gitops_root }}/argocd/applications"
+    - "{{ gitops_root }}/helm-values/rancher"
+    - "{{ gitops_root }}/helm-values/kube-prometheus-stack"
+    - "{{ gitops_root }}/manifests/external-node-exporter"
+
+# ---- Write ArgoCD Applications ----
+
+- name: Write ArgoCD Application - kube-prometheus-stack
+  ansible.builtin.copy:
+    dest: "{{ gitops_root }}/argocd/applications/kube-prometheus-stack.yaml"
+    mode: "0644"
+    content: |
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: kube-prometheus-stack
+        namespace: {{ argocd_namespace }}
+      spec:
+        project: {{ argocd_project }}
+        source:
+          repoURL: {{ gitops_repo_url }}
+          targetRevision: {{ gitops_branch }}
+          path: gitops/helm-values/kube-prometheus-stack
+          helm:
+            valueFiles:
+              - values.yaml
+        destination:
+          server: {{ argo_destination_server }}
+          namespace: {{ monitoring_namespace }}
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+
+- name: Write ArgoCD Application - external-node-exporters
+  ansible.builtin.copy:
+    dest: "{{ gitops_root }}/argocd/applications/external-node-exporters.yaml"
+    mode: "0644"
+    content: |
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: external-node-exporters
+        namespace: {{ argocd_namespace }}
+      spec:
+        project: {{ argocd_project }}
+        source:
+          repoURL: {{ gitops_repo_url }}
+          targetRevision: {{ gitops_branch }}
+          path: gitops/manifests/external-node-exporter
+        destination:
+          server: {{ argo_destination_server }}
+          namespace: {{ monitoring_namespace }}
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+
+- name: Write ArgoCD Application - rancher
+  ansible.builtin.copy:
+    dest: "{{ gitops_root }}/argocd/applications/rancher.yaml"
+    mode: "0644"
+    content: |
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: rancher
+        namespace: {{ argocd_namespace }}
+      spec:
+        project: {{ argocd_project }}
+        source:
+          repoURL: {{ gitops_repo_url }}
+          targetRevision: {{ gitops_branch }}
+          path: gitops/helm-values/rancher
+          helm:
+            valueFiles:
+              - values.yaml
+        destination:
+          server: {{ argo_destination_server }}
+          namespace: {{ rancher_namespace }}
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+
+# ---- Helm values ----
+
+- name: Write values.yaml - kube-prometheus-stack
+  ansible.builtin.copy:
+    dest: "{{ gitops_root }}/helm-values/kube-prometheus-stack/values.yaml"
+    mode: "0644"
+    content: |
+      grafana:
+        service:
+          type: ClusterIP
+      prometheus:
+        prometheusSpec:
+          serviceMonitorSelectorNilUsesHelmValues: false
+          podMonitorSelectorNilUsesHelmValues: false
+
+- name: Write values.yaml - rancher
+  ansible.builtin.copy:
+    dest: "{{ gitops_root }}/helm-values/rancher/values.yaml"
+    mode: "0644"
+    content: |
+      hostname: {{ rancher_hostname }}
+      replicas: {{ rancher_replicas }}
+      bootstrapPassword: {{ rancher_bootstrap_password }}
+      tls: {{ rancher_tls_source }}
+
+# ---- External node-exporter manifests ----
+
+- name: Write Service+Endpoints - LAN node exporter
+  ansible.builtin.template:
+    src: lan-node-exporter.yaml.j2
+    dest: "{{ gitops_root }}/manifests/external-node-exporter/lan-node-exporter.yaml"
+    mode: "0644"
+
+- name: Write Service+Endpoints - Runner node exporter
+  ansible.builtin.template:
+    src: runner-node-exporter.yaml.j2
+    dest: "{{ gitops_root }}/manifests/external-node-exporter/runner-node-exporter.yaml"
+    mode: "0644"
+
+- name: Write Service+Endpoints - Infra node exporter
+  ansible.builtin.template:
+    src: infra-node-exporter.yaml.j2
+    dest: "{{ gitops_root }}/manifests/external-node-exporter/infra-node-exporter.yaml"
+    mode: "0644"
+
+- name: Write ServiceMonitor
+  ansible.builtin.copy:
+    dest: "{{ gitops_root }}/manifests/external-node-exporter/servicemonitors.yaml"
+    mode: "0644"
+    content: |
+      apiVersion: monitoring.coreos.com/v1
+      kind: ServiceMonitor
+      metadata:
+        name: external-node-exporter
+        namespace: {{ monitoring_namespace }}
+      spec:
+        selector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - node-exporter-lan
+                - node-exporter-runner
+                - node-exporter-infra
+        namespaceSelector:
+          matchNames:
+            - {{ monitoring_namespace }}
+        endpoints:
+          - port: metrics
+            interval: 30s
+            path: /metrics
+
+# ---- Optional: init git repo / commit / push ----
+
+- name: Initialize git repository (if not exists)
+  ansible.builtin.command: git init
+  args:
+    chdir: "{{ gitops_root }}"
+    creates: "{{ gitops_root }}/.git"
+
+- name: Ensure main branch
+  ansible.builtin.command: "git checkout -B {{ gitops_branch }}"
+  args:
+    chdir: "{{ gitops_root }}"
+
+- name: Stage files
+  ansible.builtin.command: git add .
+  args:
+    chdir: "{{ gitops_root }}"
+  when: gitops_commit
+
+- name: Commit files
+  ansible.builtin.command: 'git commit -m "Bootstrap GitOps layout"'
+  args:
+    chdir: "{{ gitops_root }}"
+  register: git_commit
+  failed_when: false
+  changed_when: "'files changed' in git_commit.stdout or git_commit.rc == 0"
+  when: gitops_commit
+
+- name: Add remote (if repo url set)
+  ansible.builtin.command: "git remote add origin {{ gitops_repo_url }}"
+  args:
+    chdir: "{{ gitops_root }}"
+  failed_when: false
+  when: gitops_repo_url | length > 0
+
+- name: Push to remote (optional)
+  ansible.builtin.command: "git push -u origin {{ gitops_branch }}"
+  args:
+    chdir: "{{ gitops_root }}"
+  when: gitops_push

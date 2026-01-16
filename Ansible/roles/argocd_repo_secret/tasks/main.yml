@@ -1,0 +1,24 @@
+---
+# tasks file for argocd_repo_secret
+- name: Assert repo credentials
+  ansible.builtin.assert:
+    that:
+      - gitops_repo_url | length > 0
+      - argocd_repo_password | length > 0
+
+- name: Create ArgoCD repo secret
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: gitlab-gitops-repo
+        namespace: "{{ argocd_namespace }}"
+        labels:
+          argocd.argoproj.io/secret-type: repository
+      type: Opaque
+      stringData:
+        url: "{{ gitops_repo_url }}"
+        username: "{{ argocd_repo_username }}"
+        password: "{{ argocd_repo_password }}"

@@ -1,22 +1,21 @@
 locals {
-  cloudinit = {
-    for k, v in var.hosts :
-    k => templatefile("${path.module}/templates/cloud-init.yml.tpl", {
-      hostname       = k
-      role           = v.role
-      ip             = v.ip
-      ssh_public_key = var.ssh_public_key
-    })
-  }
-}
-
-locals {
   k8s_hosts = {
     for k, v in var.hosts :
     k => v
     if v.role == "k8s-control" || v.role == "k8s-worker"
   }
+
+  cloudinit = {
+    for k, v in local.k8s_hosts :
+    k => templatefile("${path.module}/templates/cloud-init.yml.tpl", {
+      hostname       = v.name
+      role           = v.role
+      cluster_name   = var.cluster_name
+      ssh_public_key = var.ssh_public_key
+    })
+  }
 }
+
 
 
 resource "azurerm_network_interface" "k8s" {
@@ -39,8 +38,9 @@ resource "azurerm_linux_virtual_machine" "vm" {
   name                = each.key
   location            = var.location
   resource_group_name = var.resource_group_name
-  size                = "Standard_F2"
+  size                = "Standard_B2s"
   admin_username      = "azureuser"
+  custom_data         = base64encode(local.cloudinit[each.key])
   network_interface_ids = [
     azurerm_network_interface.k8s[each.key].id,
   ]

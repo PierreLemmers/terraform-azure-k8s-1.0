@@ -1,6 +1,4 @@
-output "node_ips" {
-  value = module.k8s.private_ips
-}
+
 
 output "resource_group_name" {
   value = azurerm_resource_group.rg.name
@@ -8,4 +6,12 @@ output "resource_group_name" {
 
 output "resource_group_location" {
   value = azurerm_resource_group.rg.location
+}
+
+output "lan_cluster_nodes" {
+  value = module.k8s_clusters["lan"].nodes
+}
+
+output "runner_cluster_nodes" {
+  value = module.k8s_clusters["runner"].nodes
 }

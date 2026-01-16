@@ -1,0 +1,5 @@
+- name: Bootstrap GitOps repo layout for mgmt apps
+  hosts: ansible
+  become: false
+  roles:
+    - gitops_bootstrap

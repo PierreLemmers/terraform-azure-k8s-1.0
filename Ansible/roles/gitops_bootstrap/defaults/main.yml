@@ -1,0 +1,31 @@
+---
+# defaults file for gitops_bootstrap
+gitops_root: "/home/ansible/gitops"
+gitops_repo_url: "" # e.g. https://github.com/user/repo.git or git@gitlab...
+gitops_branch: "main"
+gitops_commit: true
+gitops_push: false # set true when you have auth ready
+
+# ArgoCD
+argocd_namespace: "argocd"
+argocd_project: "default"
+argo_destination_server: "https://kubernetes.default.svc"
+
+# Namespaces
+monitoring_namespace: "monitoring"
+rancher_namespace: "cattle-system"
+cert_manager_namespace: "cert-manager"
+
+# Rancher
+rancher_hostname: "rancher.carwash.local"
+rancher_bootstrap_password: "ChangeMe123!"
+rancher_replicas: 1
+rancher_tls_source: "rancher"
+
+# kube-prometheus-stack
+kps_app_name: "kube-prometheus-stack"
+
+# External node-exporter targets (static IPs from tfvars)
+lan_node_ips: []
+runner_node_ips: []
+infra_node_ips: []

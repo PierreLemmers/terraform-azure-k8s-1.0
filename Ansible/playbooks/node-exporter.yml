@@ -1,0 +1,11 @@
+- name: Install node exporter on all VMs
+  hosts:
+    - k8s_lan
+    - k8s_runner
+    - k8s_mgmt
+    - gitlab
+    - harbor
+    - ansible
+  become: true
+  roles:
+    - node_exporter

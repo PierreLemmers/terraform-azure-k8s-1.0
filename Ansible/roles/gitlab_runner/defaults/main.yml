@@ -1,0 +1,23 @@
+---
+# defaults file for gitlab_runner
+
+gitlab_url: "https://gitlab.carwash.local"
+runner_name_prefix: "runner"
+runner_executor: "docker"        # docker or shell
+runner_tags: ["carwash", "dmz"]
+runner_run_untagged: false
+runner_locked: false
+runner_concurrent: 2
+
+# Registration token should be stored in vault/group_vars
+runner_registration_token: ""
+
+# Docker executor config
+runner_docker_image: "ubuntu:22.04"
+runner_docker_privileged: false
+
+# Hardening
+runner_disable_password_auth: true
+runner_enable_ufw: true
+runner_allow_ssh_cidr: "10.0.0.0/16"   # tighten if you want
+
