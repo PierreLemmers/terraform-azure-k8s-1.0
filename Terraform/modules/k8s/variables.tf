@@ -27,3 +27,7 @@ variable "cluster_name" {
   type    = string
   default = "cluster"
 }
+variable "admin_username" {
+  type    = string
+  default = "ansible"
+}

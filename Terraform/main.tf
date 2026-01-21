@@ -15,10 +15,23 @@ provider "azurerm" {
 }
 
 
+provider "azuread" {}
+
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
 }
+# rbac.tf
+data "azuread_user" "me" {
+  user_principal_name = "pierre.lemmers@cinqict.nl" # e.g. pierre@company.com
+}
+
+resource "azurerm_role_assignment" "me_owner_rg" {
+  scope                = azurerm_resource_group.rg.id
+  role_definition_name = "Owner"
+  principal_id         = data.azuread_user.me.object_id
+}
+
 
 
 
@@ -44,16 +57,15 @@ locals {
 }
 
 module "k8s_clusters" {
-  for_each = var.clusters
-  source   = "./modules/k8s"
-
+  for_each            = var.clusters
+  source              = "./modules/k8s"
   resource_group_name = var.resource_group_name
   location            = var.location
-
-  subnet_id      = local.subnet_ids[each.value.subnet]
-  hosts          = each.value.nodes
-  ssh_public_key = tls_private_key.ansible.public_key_openssh
-  cluster_name   = each.key
+  ssh_public_key      = tls_private_key.lab.public_key_openssh
+  admin_username      = "ansible"
+  subnet_id           = local.subnet_ids[each.value.subnet]
+  hosts               = each.value.nodes
+  cluster_name        = each.key
 }
 
 
@@ -66,10 +78,14 @@ module "ansible_vm" {
   subnet_id           = module.network.lan_subnet_id
   resource_group_name = var.resource_group_name
   location            = var.location
-  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+  ssh_public_key      = tls_private_key.lab.public_key_openssh
+  ssh_private_key_b64 = base64encode(tls_private_key.lab.private_key_openssh)
+  admin_username      = "ansible"
+  create_ansible_user = false
+  inventory_yaml      = local.inventory_yaml
 
   # lab: allow ansible to SSH out using the same keypair
-  ssh_private_key = tls_private_key.ansible.private_key_pem
+
 
   install_ansible_tools = true
   extra_packages        = ["jq", "curl"]
@@ -92,7 +108,10 @@ module "harbor_dmz" {
   subnet_id           = module.network.dmz_subnet_id
   resource_group_name = var.resource_group_name
   location            = var.location
-  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+  ssh_public_key      = tls_private_key.lab.public_key_openssh
+  admin_username      = "ansible"
+
+
 
   # Let the module render cloud-init
   # custom_data removed
@@ -112,7 +131,9 @@ module "harbor_lan" {
   subnet_id           = module.network.lan_subnet_id
   resource_group_name = var.resource_group_name
   location            = var.location
-  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+  ssh_public_key      = tls_private_key.lab.public_key_openssh
+  admin_username      = "ansible"
+
 
   tags = {
     env = "lab"
@@ -129,7 +150,8 @@ module "gitlab" {
   subnet_id           = module.network.lan_subnet_id
   resource_group_name = var.resource_group_name
   location            = var.location
-  ssh_public_key      = tls_private_key.ansible.public_key_openssh
+  ssh_public_key      = tls_private_key.lab.public_key_openssh
+  admin_username      = "ansible"
 
   tags = {
     env = "lab"

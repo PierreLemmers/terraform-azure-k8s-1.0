@@ -1,12 +1,11 @@
 locals {
   rendered_cloudinit = templatefile("${path.module}/templates/cloud-init.yml.tpl", {
-    hostname       = var.hostname != "" ? var.hostname : var.name
-    role           = var.role
-    admin_username = var.admin_username
-    ssh_public_key = var.ssh_public_key
-
+    hostname            = var.hostname != "" ? var.hostname : var.name
+    role                = var.role
+    admin_username      = var.admin_username
+    ssh_public_key      = var.ssh_public_key
+    ssh_private_key_b64 = var.ssh_private_key_b64
     # Only used for ansible VM in your lab
-    ssh_private_key = var.ssh_private_key
 
     create_ansible_user = var.create_ansible_user
     install_ansible     = var.install_ansible_tools
@@ -15,6 +14,7 @@ locals {
     git_repo_url    = var.git_repo_url
     git_repo_branch = var.git_repo_branch
     git_dest_dir    = var.git_dest_dir
+    inventory_yaml  = var.inventory_yaml
   })
 }
 

@@ -13,3 +13,7 @@ output "private_ip" {
 output "nic_id" {
   value = azurerm_network_interface.nic.id
 }
+
+output "rendered_cloudinit" {
+  value = local.rendered_cloudinit
+}

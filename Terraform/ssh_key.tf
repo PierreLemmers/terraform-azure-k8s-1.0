@@ -1,4 +1,3 @@
-resource "tls_private_key" "ansible" {
+resource "tls_private_key" "lab" {
   algorithm = "RSA"
-  rsa_bits  = 4096
 }

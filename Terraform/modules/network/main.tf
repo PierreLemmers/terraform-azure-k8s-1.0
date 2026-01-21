@@ -49,11 +49,14 @@ resource "azurerm_bastion_host" "this" {
   location            = var.location
   resource_group_name = var.resource_group_name
 
+  sku = "Standard"
+
   ip_configuration {
     name                 = "configuration"
     subnet_id            = azurerm_subnet.bastion.id
     public_ip_address_id = azurerm_public_ip.bastion.id
   }
+  tunneling_enabled = true
 }
 
 # --- NSGs ---

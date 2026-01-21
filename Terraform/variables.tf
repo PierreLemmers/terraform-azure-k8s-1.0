@@ -43,3 +43,14 @@ variable "dmz_subnet_cidr" { type = string }
 
 variable "enable_bastion" { type = bool }
 variable "bastion_subnet_cidr" { type = string }
+variable "ssh_public_key" {
+  type = string
+}
+variable "inventory_yaml" {
+  type    = string
+  default = ""
+}
+variable "admin_username" {
+  type    = string
+  default = "ansible"
+}

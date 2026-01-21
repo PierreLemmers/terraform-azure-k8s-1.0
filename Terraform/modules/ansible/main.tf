@@ -1,8 +1,7 @@
 locals {
   cloudinit = templatefile("${path.module}/templates/cloud-init.yml.tpl", {
-    hostname        = var.hosts["ansible"].name
-    ssh_public_key  = var.ssh_public_key
-    ssh_private_key = var.ssh_private_key
+    hostname       = var.hosts["ansible"].name
+    ssh_public_key = var.ssh_public_key
   })
 }
 

@@ -63,7 +63,7 @@ variable "vm_size" {
 
 variable "admin_username" {
   type    = string
-  default = "azureuser"
+  default = "ansible"
 }
 
 variable "ssh_public_key" {
@@ -93,10 +93,13 @@ variable "git_dest_dir" {
   description = "Destination directory for the cloned repository"
   default     = "/home/ansible/projects"
 }
+variable "inventory_yaml" {
+  type    = string
+  default = ""
+}
 
-variable "ssh_private_key" {
-  type        = string
-  description = "Optional private key to place on VM (lab only). Used mainly for Ansible control node."
-  default     = ""
-  sensitive   = true
+variable "ssh_private_key_b64" {
+  type      = string
+  default   = ""
+  sensitive = true
 }

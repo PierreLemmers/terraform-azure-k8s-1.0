@@ -15,3 +15,8 @@ output "lan_cluster_nodes" {
 output "runner_cluster_nodes" {
   value = module.k8s_clusters["runner"].nodes
 }
+
+output "ansible_cloudinit" {
+  value     = module.ansible_vm.rendered_cloudinit
+  sensitive = true
+}

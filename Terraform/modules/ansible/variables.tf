@@ -9,10 +9,7 @@ variable "ssh_public_key" {
   type = string
 }
 
-variable "ssh_private_key" {
-  type      = string
-  sensitive = true
-}
+
 variable "location" {}
 
 variable "hosts" {
@@ -41,4 +38,8 @@ variable "git_dest_dir" {
   type        = string
   description = "Destination directory for the cloned repository"
   default     = "/home/ansible/projects"
+}
+variable "inventory_yaml" {
+  type    = string
+  default = ""
 }

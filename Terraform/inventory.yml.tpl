@@ -1,4 +1,8 @@
 all:
+  vars:
+    ansible_user: ansible
+    ansible_become: true
+    ansible_ssh_private_key_file: /home/ansible/.ssh/lab_key
   children:
     ansible:
       hosts:

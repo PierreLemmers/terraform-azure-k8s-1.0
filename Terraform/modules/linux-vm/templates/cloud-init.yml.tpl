@@ -2,6 +2,14 @@
 hostname: ${hostname}
 manage_etc_hosts: true
 
+%{ if role == "ansible" && create_ansible_user }
+bootcmd:
+  - [ bash, -lc, "id ansible >/dev/null 2>&1 || useradd -m -s /bin/bash ansible" ]
+  - [ bash, -lc, "usermod -aG sudo ansible || true" ]
+  - [ bash, -lc, "mkdir -p /home/ansible/.ssh /home/ansible/ansible/inventory /home/ansible/projects" ]
+  - [ bash, -lc, "chown -R ansible:ansible /home/ansible" ]
+%{ endif }
+
 users:
   - name: ${admin_username}
     sudo: ALL=(ALL) NOPASSWD:ALL
@@ -9,15 +17,6 @@ users:
     shell: /bin/bash
     ssh_authorized_keys:
       - ${ssh_public_key}
-
-%{ if create_ansible_user }
-  - name: ansible
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    groups: sudo
-    shell: /bin/bash
-    ssh_authorized_keys:
-      - ${ssh_public_key}
-%{ endif }
 
 package_update: true
 packages:
@@ -31,32 +30,33 @@ packages:
   - ansible
 %{ endif }
 
-runcmd:
-  - echo "role=${role}" > /etc/carwash-role
 
-%{ if role == "ansible" && ssh_private_key != "" }
 write_files:
-  - path: /home/ansible/.ssh/id_rsa
+%{ if role == "ansible" && inventory_yaml != "" }
+  - path: /home/ansible/ansible/inventory/inventory.yml
+    owner: ansible:ansible
+    permissions: "0644"
+    content: ${jsonencode(inventory_yaml)}
+%{ endif }
+%{ if role == "ansible" && ssh_private_key_b64 != "" }
+  - path: /home/ansible/.ssh/lab_key
     owner: ansible:ansible
     permissions: "0600"
+    encoding: b64
     content: |
-${indent(6, ssh_private_key)}
+      ${ssh_private_key_b64}
 %{ endif }
 
 runcmd:
-  - echo "role=${role}" > /etc/carwash-role
-
-%{ if role == "ansible" && git_repo_url != "" }
-  - apt-get update -y
-  - apt-get install -y git ca-certificates
-  - mkdir -p ${git_dest_dir}
-  - chown -R ansible:ansible ${git_dest_dir}
-  - |
-      set -e
-      DEST="${git_dest_dir}/carwash"
-      if [ -d "$${DEST}/.git" ]; then
-        sudo -u ansible bash -lc "cd $${DEST} && git fetch --all && git checkout ${git_repo_branch} && git pull"
-      else
-        sudo -u ansible bash -lc "git clone --branch ${git_repo_branch} ${git_repo_url} $${DEST}"
-      fi
+%{ if role == "ansible" }
+  - [ bash, -lc, "install -d -o ansible -g ansible /home/ansible/ansible/inventory /home/ansible/.ssh ${git_dest_dir}" ]
+  - [ bash, -lc, "chown -R ansible:ansible /home/ansible/ansible /home/ansible/.ssh ${git_dest_dir}" ]
+%{ if ssh_private_key_b64 != "" }
+  - [ bash, -lc, "chmod 700 /home/ansible/.ssh && chmod 600 /home/ansible/.ssh/lab_key" ]
+%{ endif }
+%{ if git_repo_url != "" }
+  - [ bash, -lc, "apt-get update -y" ]
+  - [ bash, -lc, "apt-get install -y git ca-certificates" ]
+  - [ bash, -lc, "set -e; DEST='${git_dest_dir}/terraform-azure-k8s-1.0'; if [ -d \"$DEST/.git\" ]; then sudo -u ansible bash -lc \"cd \\\"$DEST\\\" && git fetch --all && git checkout ${git_repo_branch} && git pull\"; else sudo -u ansible bash -lc \"git clone --branch ${git_repo_branch} ${git_repo_url} \\\"$DEST\\\"\"; fi" ]
+%{ endif }
 %{ endif }
