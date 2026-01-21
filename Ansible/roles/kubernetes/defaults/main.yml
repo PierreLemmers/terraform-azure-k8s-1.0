@@ -44,3 +44,5 @@ kubeconfig_files:
 worker_node_taints:
   - kubectl label nodes k8s-worker1 node-role.kubernetes.io/worker=worker
   - kubectl label nodes k8s-worker2 node-role.kubernetes.io/worker=worker
+  -
+ip_forward_value: 1

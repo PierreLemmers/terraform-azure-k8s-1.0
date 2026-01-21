@@ -19,7 +19,7 @@
 - name: Enable IP forwarding
   ansible.builtin.sysctl:
     name: net.ipv4.ip_forward
-    value: "{{ ip_forward_value }}"
+    value: 1
     state: present
 
 - name: Load kernel modules
@@ -36,7 +36,7 @@
   loop:
     - "net.bridge.bridge-nf-call-iptables = 1"
     - "net.bridge.bridge-nf-call-ip6tables = 1"
-    - "net.ipv4.ip_forward = {{ ip_forward_value }}"
+    - "net.ipv4.ip_forward = { ip_forward_value }}"
 
 - name: Apply sysctl settings
   ansible.builtin.command: sysctl -p
