@@ -1,0 +1,15 @@
+---
+# tasks file for rancher_register
+---
+- name: Assert Rancher token present
+  ansible.builtin.assert:
+    that:
+      - rancher_api_token | length > 20
+    fail_msg: "rancher_api_token ontbreekt. Zet deze in vault."
+
+- name: Create/lookup Rancher cluster IDs (per cluster)
+  ansible.builtin.include_tasks: create_lookup_cluster.yml
+  loop: "{{ rancher_import_clusters }}"
+  loop_control:
+    loop_var: rc
+    label: "{{ rc.name }}"

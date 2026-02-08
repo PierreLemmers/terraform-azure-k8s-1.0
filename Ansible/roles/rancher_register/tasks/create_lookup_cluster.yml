@@ -1,0 +1,40 @@
+---
+- name: Create imported cluster in Rancher (best effort)
+  ansible.builtin.uri:
+    url: "{{ rancher_url }}/v3/clusters"
+    method: POST
+    validate_certs: "{{ rancher_validate_certs }}"
+    headers:
+      Authorization: "Bearer {{ rancher_api_token }}"
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      type: "cluster"
+      name: "{{ rc.name }}"
+  register: create_cluster
+  failed_when: create_cluster.status not in [201, 409, 422]
+  changed_when: create_cluster.status == 201
+  delegate_to: localhost
+  run_once: true
+
+- name: Lookup cluster by name
+  ansible.builtin.uri:
+    url: "{{ rancher_url }}/v3/clusters?name={{ rc.name }}"
+    method: GET
+    validate_certs: "{{ rancher_validate_certs }}"
+    headers:
+      Authorization: "Bearer {{ rancher_api_token }}"
+  register: lookup_cluster
+  changed_when: false
+  delegate_to: localhost
+  run_once: true
+
+- name: Save cluster id
+  ansible.builtin.set_fact:
+    rancher_cluster_ids: >-
+      {{
+        rancher_cluster_ids | default({}) |
+        combine({ rc.name: lookup_cluster.json.data[0].id })
+      }}
+  delegate_to: localhost
+  run_once: true
