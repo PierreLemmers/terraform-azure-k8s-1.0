@@ -1,0 +1,22 @@
+---
+- name: Determine control host for this cluster
+  ansible.builtin.set_fact:
+    rancher_ctrl_host: "{{ groups[rc.control_group][0] }}"
+  run_once: true
+
+- name: Ensure kubectl exists on control node ({{ rc.name }})
+  ansible.builtin.command: kubectl version --client=true --short
+  changed_when: false
+  delegate_to: "{{ rancher_ctrl_host }}"
+  run_once: true
+
+- name: Apply Rancher import manifest on control node ({{ rc.name }})
+  ansible.builtin.shell: |
+    set -euo pipefail
+    export KUBECONFIG="{{ kubeconfig_path_on_control }}"
+    {{ rancher_import_cmds[rc.name] }}
+  args:
+    executable: /bin/bash
+  delegate_to: "{{ rancher_ctrl_host }}"
+  run_once: true
+  changed_when: true

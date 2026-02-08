@@ -1,5 +1,3 @@
----
-# tasks file for rancher
 - name: Add Helm repos
   kubernetes.core.helm_repository:
     name: jetstack
